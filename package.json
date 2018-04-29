@@ -1,0 +1,13 @@
+{
+  "name": "vk_to_telegram",
+  "version": "1.0.0",
+  "description": "Bot sending posts from vk to telegram",
+  "main": "index.js",
+  "repository": "git@github.com:proton/vk_to_telegram.git",
+  "author": "Peter Savichev (proton) <psavichev@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "node-vkapi": "^3.0.7",
+    "telebot": "^1.2.6"
+  }
+}
