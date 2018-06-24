@@ -1,9 +1,11 @@
 {
-  "name": "vk_to_telegram",
+  "name": "super_flight_bot",
   "version": "1.0.0",
-  "description": "Bot sending posts from vk to telegram",
-  "main": "index.js",
-  "repository": "git@github.com:proton/vk_to_telegram.git",
+  "description": "Bot filtering interesting flights for you [RU]",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "repository": "git@github.com:proton/super_flight_bot.git",
   "author": "Peter Savichev (proton) <psavichev@gmail.com>",
   "license": "MIT",
   "dependencies": {
