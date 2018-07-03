@@ -46,6 +46,13 @@ bot.on('/keywords', (msg) => {
   if (keywords.length) answer = 'Keywords:\n' + keywords.join('\n')
   else answer = 'No keywords\nEnter\n/add keyword\nto add new one'
   return msg.reply.text(answer);
+})
+
+bot.on(/^\/add (.+)$/, (msg, props) => {
+  const newKeyword = props.match[1];
+  usersKeywords[msg.from.id].push(newKeyword);
+  let answer = `Added keyword ${newKeyword}`
+  return msg.reply.text(answer);
 });
 
 loadNewPostsLoop();
