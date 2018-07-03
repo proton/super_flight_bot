@@ -1,3 +1,8 @@
-- simple vk feed parser
-- vk 2 tg
-- users + history
+- save last post for user
+- users db
+- config
+- /add keyword
+- /show keywords
+- /delete keyword
+- /start/stop
+- /help
