@@ -1,7 +1,7 @@
 const TeleBot = require('telebot');
 const bot = new TeleBot(process.env.TG_TOKEN);
-
 const vkapi = new (require('node-vkapi'))({ accessToken: process.env.VK_TOKEN });
+const LOOP_INTERVAL = 3000;
 
 let usersKeywords = {
   60037421: ['берлин']
@@ -36,7 +36,7 @@ function loadNewPosts() {
 
 function loadNewPostsLoop() {
   loadNewPosts();
-  setTimeout(loadNewPostsLoop, 3000);
+  setTimeout(loadNewPostsLoop, LOOP_INTERVAL);
 }
 
 loadNewPostsLoop();
