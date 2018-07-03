@@ -10,14 +10,15 @@ let usersKeywords = {
 const vkGroups = [63731512, 119000633];
 let vkGroupLastMessageIds = {};
 
-// every minute
-
-vkGroups.forEach(vkGroupId => {
-  return vkapi.call('wall.get', { owner_id: -vkGroupId, count: 100 })
+function loadGroupPosts(groupId) {
+  vkapi.call('wall.get', { owner_id: -groupId, count: 100 })
     .then(response => {
-      response.items.forEach(post => {
+      response.items.reverse().forEach(post => {
+        if (vkGroupLastMessageIds[groupId] > post.id) return;
+        vkGroupLastMessageIds[groupId] = post.id;
+
         let lowercased_text = post.text.toLowerCase();
-        const url = `https://vk.com/wall-${vkGroupId}_${post.id}`
+        const url = `https://vk.com/wall-${groupId}_${post.id}`
         for (var user_id in usersKeywords) {
           let keywords = usersKeywords[user_id];
           if(keywords.some(keyword => lowercased_text.includes(keyword))) {
@@ -26,14 +27,22 @@ vkGroups.forEach(vkGroupId => {
           }
         }
       });
-
-      // const photo = response.items[0].attachments[0].photo;
-
-      // return vkapi.call('photos.getById', {
-      //   photos: `${photo.owner_id}_${photo.id}_${photo.access_key}`
-      // });
     });
-});
+}
+
+function loadNewPosts() {
+  vkGroups.forEach(vkGroupId => loadGroupPosts(vkGroupId));
+}
+
+function loadNewPostsLoop() {
+  loadNewPosts();
+  setTimeout(loadNewPostsLoop, 3000);
+}
+
+loadNewPostsLoop();
+
+
+// every minute
 
 
 
