@@ -30,6 +30,8 @@ function loadGroupPosts(groupId) {
     });
 }
 
+bot.start();
+
 function loadNewPosts() {
   vkGroups.forEach(vkGroupId => loadGroupPosts(vkGroupId));
 }
@@ -38,6 +40,13 @@ function loadNewPostsLoop() {
   loadNewPosts();
   setTimeout(loadNewPostsLoop, LOOP_INTERVAL);
 }
+
+bot.on('/keywords', (msg) => {
+  const keywords = usersKeywords[msg.from.id];
+  if (keywords.length) answer = 'Keywords:\n' + keywords.join('\n')
+  else answer = 'No keywords\nEnter\n/add keyword\nto add new one'
+  return msg.reply.text(answer);
+});
 
 loadNewPostsLoop();
 
@@ -53,7 +62,6 @@ loadNewPostsLoop();
 
 // bot.on('text', (msg) => { console.log(msg); msg.reply.text(msg.text) });
 
-// bot.start();
 
 // // user = msg.from.id
 // bot.sendMessage(60037421, "Hello!");

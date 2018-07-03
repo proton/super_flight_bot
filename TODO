@@ -2,7 +2,6 @@
 - users db
 - config
 - /add keyword
-- /show keywords
 - /delete keyword
 - /start/stop
 - /help
