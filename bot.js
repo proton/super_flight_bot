@@ -56,23 +56,3 @@ bot.on(/^\/add (.+)$/, (msg, props) => {
 });
 
 loadNewPostsLoop();
-
-
-// every minute
-
-
-
-
-//
-
-//
-
-// bot.on('text', (msg) => { console.log(msg); msg.reply.text(msg.text) });
-
-
-// // user = msg.from.id
-// bot.sendMessage(60037421, "Hello!");
-// bot.sendMessage(60037421, "Hello!");
-// bot.sendMessage(60037421, "Hello!");
-
-// TODO: rss parser
