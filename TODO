@@ -1,7 +1,11 @@
-- save last post for user
-- users db
-- config
+db:
+- user keywords
+- last post of group
+
+config:
+- group ids // admin setting?
+
 - /add keyword
 - /delete keyword
-- /start/stop
+- /start
 - /help

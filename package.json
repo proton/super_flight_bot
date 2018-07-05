@@ -9,6 +9,7 @@
   "author": "Peter Savichev (proton) <psavichev@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "nedb": "^1.8.0",
     "node-vkapi": "^3.0.7",
     "telebot": "^1.2.6"
   }
