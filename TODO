@@ -4,3 +4,5 @@ db:
 
 config:
 - group ids // admin setting?
+
+- lint + beutify

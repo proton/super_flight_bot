@@ -6,6 +6,7 @@ const Datastore = require('nedb-promises')
 const LOOP_INTERVAL = 3000;
 const vkGroups = [63731512, 119000633];
 const SOME_ERROR_MESSAGE = 'Some error :(\nPlease try again later.';
+const adminIds = loadAdminIds();
 
 let db = {};
 db.userKeywords = Datastore.create('var/user_keywords.db');
@@ -13,6 +14,15 @@ db.vkGroups = Datastore.create('var/vk_groups.db');
 
 let keywordUsers = {};
 let vkGroupLastMessageIds = {};
+
+function loadAdminIds() {
+  let str = process.env.ADMIN_IDS || '';
+  return str.length ? str.split(',').map(id => +id) : [];
+}
+
+function isAdmin(userId) {
+  return adminIds.includes(userId);
+}
 
 function postUrl(post) {
   return `https://vk.com/wall${post.fromId}_${post.id}`
@@ -80,12 +90,17 @@ async function reloadKeywordUsers(keyword) {
   keywordUsers[keyword] = userIds;
 }
 
-function helpMessage() {
-  return '' +
-    '/add keyword - Adds new keyword to the list\n' +
-    '/delete keyword - Delete keyword from the list\n' +
-    '/keywords - List your keywords\n' +
-    '/help - This help';
+function commandList(userId) {
+  const baseCommands = [
+    '/add keyword - Adds new keyword to the list',
+    '/delete keyword - Delete keyword from the list',
+    '/keywords - List your keywords',
+    '/help - This help'
+  ];
+  const adminCommands = [
+    '/add_vk_group - Adds new vk group'
+  ];
+  return isAdmin(userId) ? baseCommands.concat(adminCommands) : baseCommands;
 }
 
 async function commandAdd(msg, props) {
@@ -133,7 +148,9 @@ async function commandKeywords(msg, _props) {
 }
 
 async function commandHelp(msg, _props) {
-  let answer = helpMessage();
+  const userId = msg.from.id;
+
+  let answer = commandList(userId).join('\n');
   return msg.reply.text(answer);
 }
 
