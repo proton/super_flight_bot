@@ -359,6 +359,12 @@ mkdirp@~0.5.1:
   dependencies:
     minimist "0.0.8"
 
+nedb-promises@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/nedb-promises/-/nedb-promises-3.0.1.tgz#e3b6b891b043fc69a8c1c94f48b76ca179e69596"
+  dependencies:
+    nedb "^1.8.0"
+
 nedb@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/nedb/-/nedb-1.8.0.tgz#0e3502cd82c004d5355a43c9e55577bd7bd91d88"
