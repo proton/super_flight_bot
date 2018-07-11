@@ -1,8 +1,5 @@
 db:
-- user keywords
 - last post of group
-
-config:
-- group ids // admin setting?
+- group ids
 
 - lint + beutify
