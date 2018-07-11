@@ -80,9 +80,9 @@ function currentTimestamp() {
 }
 
 function reloadKeywordUsers(keyword) {
-  db.userKeywords.find({keyword: keyword}, (err, docs) => {
-    if (!err) keywordUsers[keyword] = docs;
-  });
+  let docs = await db.userKeywords.find({keyword: keyword});
+  const userIds = docs.map((doc) => doc.user_id);
+  keywordUsers[keyword] = userIds;
 }
 
 async function commandAdd(msg, props) {
@@ -110,34 +110,6 @@ async function commandKeywords(msg, _props) {
   return msg.reply.text(answer);
 }
 bot.on('/keywords', commandKeywords);
-
-// bot.on(/^\/add (.+)$/, (msg, props) => {
-//   const keyword = props.match[1];
-//   const userId = msg.from.id;
-
-//   //
-
-//   let objKeyword = { keyword: keyword, user_id: userId };
-//   docs = await db.userKeywords.find(objKeyword);
-//   console.log(docs);
-
-//   // let objKeyword = { keyword: keyword, user_id: userId };
-//   // db.userKeywords.find(objKeyword, (err, docs) => {
-//   //   if (err) return msg.reply.text(SOME_ERROR_MESSAGE);
-//   //   if (docs.length) return msg.reply.text(`Keyword ${keyword} already exists`
-//   //     + "\n\n" + userKeywordsMessage(msg.from.id));
-
-//   //   objKeyword = Object.assign(objKeyword, { created_at: currentTimestamp() });
-
-//   //   db.insert(objKeyword, function (err, _newDoc) {
-//   //     if (err) return msg.reply.text(SOME_ERROR_MESSAGE);
-//   //     reloadKeywordUsers(keyword);
-//   //     let answer = `Added keyword ${keyword}`
-//   //       + "\n\n" + userKeywordsMessage(userId);
-//   //     return msg.reply.text(answer);
-//   //   });
-//   // });
-// });
 
 bot.on(/^\/delete (.+)$/, (msg, props) => {
   const keyword = props.match[1];
