@@ -8,16 +8,11 @@ const vkGroups = [63731512, 119000633];
 const SOME_ERROR_MESSAGE = 'Some error :(\nPlease try again later.';
 
 let db = {};
-db.userKeywords = Datastore.create('var/user_keywords.db')
-db.vkGroups = Datastore.create('var/vk_groups.db')
-// db.userKeywords = new Datastore({ filename: 'var/user_keywords.db', autoload: true });
-// db.vkGroups = new Datastore({ filename: 'var/vk_groups.db', autoload: true });
+db.userKeywords = Datastore.create('var/user_keywords.db');
+db.vkGroups = Datastore.create('var/vk_groups.db');
 
 let keywordUsers = {};
 let vkGroupLastMessageIds = {};
-// let keywordUsers = {
-//   'берлин': [60037421]
-// }
 
 function postUrl(post) {
   return `https://vk.com/wall${post.fromId}_${post.id}`
