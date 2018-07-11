@@ -74,45 +74,11 @@ function currentTimestamp() {
   return now.toJSON()
 }
 
-function reloadKeywordUsers(keyword) {
+async function reloadKeywordUsers(keyword) {
   let docs = await db.userKeywords.find({keyword: keyword});
   const userIds = docs.map((doc) => doc.user_id);
   keywordUsers[keyword] = userIds;
 }
-
-async function commandAdd(msg, props) {
-  const keyword = props.match[1];
-  const userId = msg.from.id;
-
-  let objKeyword = { keyword: keyword, user_id: userId };
-  let docs = await db.userKeywords.find(objKeyword);
-  if (docs.length) return msg.reply.text(`Keyword ${keyword} already exists`
-    + "\n\n" + userKeywordsMessage(msg.from.id));
-
-  objKeyword = Object.assign(objKeyword, { created_at: currentTimestamp() });
-
-  await db.userKeywords.insert(objKeyword);
-  await reloadKeywordUsers(keyword);
-
-  let answer = `Added keyword ${keyword}`
-    + "\n\n" + await userKeywordsMessage(userId);
-  return msg.reply.text(answer);
-}
-bot.on(/^\/add (.+)$/, commandAdd);
-
-async function commandKeywords(msg, _props) {
-  let answer = await userKeywordsMessage(msg.from.id);
-  return msg.reply.text(answer);
-}
-bot.on('/keywords', commandKeywords);
-
-bot.on(/^\/delete (.+)$/, (msg, props) => {
-  const keyword = props.match[1];
-  // usersKeywords[msg.from.id].remove(keyword); ???
-  let answer = `Deleted keyword ${keyword}`
-    + "\n\n" + userKeywordsMessage(msg.from.id);
-  return msg.reply.text(answer);
-});
 
 function helpMessage() {
   return '' +
@@ -122,10 +88,59 @@ function helpMessage() {
     '/help - This help';
 }
 
-bot.on(['/start', '/help'], (msg) => {
+async function commandAdd(msg, props) {
+  const keyword = props.match[1];
+  const userId = msg.from.id;
+
+  let objKeyword = { keyword: keyword, user_id: userId };
+  let docs = await db.userKeywords.find(objKeyword);
+
+  let answer;
+  if (docs.length) answer = `Keyword ${keyword} already exists`;
+  else {
+    objKeyword = Object.assign(objKeyword, { created_at: currentTimestamp() });
+    await db.userKeywords.insert(objKeyword);
+    await reloadKeywordUsers(keyword);
+    answer = `Added keyword ${keyword}`;
+  }
+
+  answer += "\n\n" + await userKeywordsMessage(userId);
+  return msg.reply.text(answer);
+}
+
+async function commandDelete(msg, props) {
+  const keyword = props.match[1];
+  const userId = msg.from.id;
+
+  let objKeyword = { keyword: keyword, user_id: userId };
+
+  const cnt = await db.userKeywords.remove(objKeyword, { multi: true });
+
+  let answer;
+  if (cnt == 0) answer = `Keyword ${keyword} doesnt exist`;
+  else {
+    answer = `Deleted keyword ${keyword}`;
+    await reloadKeywordUsers(keyword);
+  }
+
+  answer += "\n\n" + await userKeywordsMessage(userId);
+  return msg.reply.text(answer);
+}
+
+async function commandKeywords(msg, _props) {
+  let answer = await userKeywordsMessage(msg.from.id);
+  return msg.reply.text(answer);
+}
+
+async function commandHelp(msg, _props) {
   let answer = helpMessage();
   return msg.reply.text(answer);
-});
+}
+
+bot.on(/^\/add (.+)$/, commandAdd);
+bot.on(/^\/delete (.+)$/, commandDelete);
+bot.on('/keywords', commandKeywords);
+bot.on(['/start', '/help'], commandHelp);
 
 bot.start();
 loadNewPostsLoop();

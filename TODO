@@ -4,8 +4,3 @@ db:
 
 config:
 - group ids // admin setting?
-
-- /add keyword
-- /delete keyword
-- /start
-- /help
