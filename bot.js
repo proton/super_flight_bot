@@ -4,8 +4,8 @@ const bot = new TeleBot(process.env.TG_TOKEN);
 const vkapi = new (require('node-vkapi'))({ accessToken: process.env.VK_TOKEN });
 const Datastore = require('nedb-promises')
 const LOOP_INTERVAL = 3000;
-const vkGroups = [63731512, 119000633];
 const SOME_ERROR_MESSAGE = 'Some error :(\nPlease try again later.';
+const NOT_AUTHORIZED_MESSAGE = 'not authorized';
 const adminIds = loadAdminIds();
 
 let db = {};
@@ -77,6 +77,17 @@ async function userKeywordsMessage(userId) {
   const keywords = await userKeywords(userId);
   if (keywords.length) return 'Your keywords:\n' + keywords.join('\n')
   return 'No keywords\nEnter\n/add keyword\nto add new one'
+}
+
+async function vkGroupIds() {
+  let docs = await db.vkGroups.find();
+  return docs.map((doc) => doc.group_id);
+}
+
+async function vkGroupsListsMessage() {
+  const groupIds = await vkGroupIds();
+  if (groupIds.length) return 'Vk groups:\n' + groupIds.join('\n')
+  return 'No vk groups\nEnter\n/add_vk_group group_id\nto add new one'
 }
 
 function currentTimestamp() {
@@ -154,10 +165,68 @@ async function commandHelp(msg, _props) {
   return msg.reply.text(answer);
 }
 
+async function commandAddVkGroup(msg, props) {
+  let vkGroupId = props.match[1];
+  const userId = msg.from.id;
+  if(!isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
+
+  try {
+    let groups = await vkapi.call('groups.getById', { group_id: vkGroupId });
+    let group = groups[0];
+    vkGroupId = group.id;
+  
+    let objGroup = { group_id: vkGroupId };
+    let docs = await db.vkGroups.find(objGroup);
+    let answer;
+    if (docs.length) answer = `Group ${vkGroupId} already exists`;
+    else {
+      objGroup = Object.assign(objGroup, { added_at: currentTimestamp() });
+      await db.vkGroups.insert(objGroup);
+      answer = `Added group ${vkGroupId}`;
+    }
+    
+    answer += "\n\n" + await vkGroupsListsMessage(userId);
+    return msg.reply.text(answer);
+  }
+  catch(error) {
+    let answer = SOME_ERROR_MESSAGE;
+    if (isAdmin(userId)) answer += '\n\n' + error;
+    return msg.reply.text(answer);
+  }
+}
+
+async function commandDeleteVkGroup(msg, props) {
+  let vkGroupId = +props.match[1];
+  const userId = msg.from.id;
+  if(!isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
+
+  let objGroup = { group_id: vkGroupId };
+
+  const cnt = await db.vkGroups.remove(objGroup, { multi: true });
+
+  let answer;
+  if (cnt == 0) answer = `Vk group ${vkGroupId} doesnt exist`;
+  else answer = `Deleted vk group ${vkGroupId}`;
+
+  answer += "\n\n" + await vkGroupsListsMessage(userId);
+  return msg.reply.text(answer);
+}
+
+async function commandVkGroups(msg, _props) {
+  const userId = msg.from.id;
+  if(!isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
+
+  let answer = await vkGroupsListsMessage();
+  return msg.reply.text(answer);
+}
+
 bot.on(/^\/add (.+)$/, commandAdd);
 bot.on(/^\/delete (.+)$/, commandDelete);
 bot.on('/keywords', commandKeywords);
+bot.on(/^\/add_vk_group (.+)$/, commandAddVkGroup);
+bot.on(/^\/delete_vk_group (.+)$/, commandDeleteVkGroup);
+bot.on('/vk_groups', commandVkGroups);
 bot.on(['/start', '/help'], commandHelp);
-
 bot.start();
+
 loadNewPostsLoop();
