@@ -1,6 +1,6 @@
 db:
-- last post of group
-
+  - last post of group
 - lint + beutify
-
 - wrapper (try + admin + help)
+- readme
+- docker
