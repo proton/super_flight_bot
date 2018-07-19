@@ -231,7 +231,12 @@ function wrapCommand(command) {
     const userId = msg.from.id;
     if (command.admin && !isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
 
-    return command.function(msg, props);
+    try { command.function(msg, props) }
+    catch(error) {
+      let answer = SOME_ERROR_MESSAGE;
+      if (isAdmin(userId)) answer += '\n\n' + error;
+      return msg.reply.text(answer);
+    }
   };
 }
 
