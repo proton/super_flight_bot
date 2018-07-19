@@ -101,19 +101,6 @@ async function reloadKeywordUsers(keyword) {
   keywordUsers[keyword] = userIds;
 }
 
-function commandList(userId) {
-  const baseCommands = [
-    '/add keyword - Adds new keyword to the list',
-    '/delete keyword - Delete keyword from the list',
-    '/keywords - List your keywords',
-    '/help - This help'
-  ];
-  const adminCommands = [
-    '/add_vk_group - Adds new vk group'
-  ];
-  return isAdmin(userId) ? baseCommands.concat(adminCommands) : baseCommands;
-}
-
 async function commandAdd(msg, props) {
   const keyword = props.match[1];
   const userId = msg.from.id;
@@ -159,9 +146,11 @@ async function commandKeywords(msg, _props) {
 }
 
 async function commandHelp(msg, _props) {
-  const userId = msg.from.id;
-
-  let answer = commandList(userId).join('\n');
+  const userIsAdmin = isAdmin(msg.from.id);
+  let answer = commands.filter(cmd => !cmd.admin || userIsAdmin)
+                             .map(cmd => cmd.description)
+                             .join('\n');
+  
   return msg.reply.text(answer);
 }
 
