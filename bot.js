@@ -157,38 +157,26 @@ async function commandHelp(msg, _props) {
 async function commandAddVkGroup(msg, props) {
   let vkGroupId = props.match[1];
   const userId = msg.from.id;
-  if(!isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
-
-  try {
-    let groups = await vkapi.call('groups.getById', { group_id: vkGroupId });
-    let group = groups[0];
-    vkGroupId = group.id;
   
-    let objGroup = { group_id: vkGroupId };
-    let docs = await db.vkGroups.find(objGroup);
-    let answer;
-    if (docs.length) answer = `Group ${vkGroupId} already exists`;
-    else {
-      objGroup = Object.assign(objGroup, { added_at: currentTimestamp() });
-      await db.vkGroups.insert(objGroup);
-      answer = `Added group ${vkGroupId}`;
-    }
-    
-    answer += "\n\n" + await vkGroupsListsMessage(userId);
-    return msg.reply.text(answer);
+  let groups = await vkapi.call('groups.getById', { group_id: vkGroupId });
+  let group = groups[0];
+  vkGroupId = group.id;
+
+  let objGroup = { group_id: vkGroupId };
+  let docs = await db.vkGroups.find(objGroup);
+  let answer;
+  if (docs.length) answer = `Group ${vkGroupId} already exists`;
+  else {
+    objGroup = Object.assign(objGroup, { added_at: currentTimestamp() });
+    await db.vkGroups.insert(objGroup);
+    answer = `Added group ${vkGroupId}`;
   }
-  catch(error) {
-    let answer = SOME_ERROR_MESSAGE;
-    if (isAdmin(userId)) answer += '\n\n' + error;
-    return msg.reply.text(answer);
-  }
+  
+  answer += "\n\n" + await vkGroupsListsMessage(userId);
+  return msg.reply.text(answer);
 }
 
 async function commandDeleteVkGroup(msg, props) {
-  let vkGroupId = +props.match[1];
-  const userId = msg.from.id;
-  if(!isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
-
   let objGroup = { group_id: vkGroupId };
 
   const cnt = await db.vkGroups.remove(objGroup, { multi: true });
@@ -202,9 +190,6 @@ async function commandDeleteVkGroup(msg, props) {
 }
 
 async function commandVkGroups(msg, _props) {
-  const userId = msg.from.id;
-  if(!isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
-
   let answer = await vkGroupsListsMessage();
   return msg.reply.text(answer);
 }
