@@ -15,6 +15,14 @@ db.vkGroups = Datastore.create('var/vk_groups.db');
 let keywordUsers = {};
 let vkGroupLastMessageIds = {};
 
+async function loadKeywordUsers() {
+  let docs = await db.userKeywords.find();
+  docs.forEach(doc => {
+    if (!(doc.keyword in keywordUsers)) keywordUsers[doc.keyword] = [];
+    keywordUsers[doc.keyword].push(doc.user_id);
+  })
+}
+
 function loadAdminIds() {
   let str = process.env.ADMIN_IDS || '';
   return str.length ? str.split(',').map(id => +id) : [];
@@ -39,12 +47,11 @@ function sendPostToUsers(bot, post) {
   for (let keyword in keywordUsers) {
     if (!lowercased_text.includes(keyword)) continue;
     let text = postToMessage(post);
-    userIds = keywordUsers[keyword];
-    for (let userId in userIds) {
-      if (sentToUsers[userId]) continue;
-      sentToUsers[userId] = true;
-      bot.sendMessage(userId, text);
-    }
+    let userIds = keywordUsers[keyword];
+    userIds.forEach(userId => {
+      if (sentToUsers[userId]) return;
+      bot.sendMessage(userId, text).catch(err => console.log(err));
+    });
   }
 }
 
@@ -56,16 +63,17 @@ function loadGroupPosts(groupId) {
         vkGroupLastMessageIds[groupId] = post.id;
         sendPostToUsers(bot, post);
       });
-    });
+    }).catch(err => { console.log(err) });
 }
 
-function loadNewPosts() {
-  vkGroups.forEach(vkGroupId => loadGroupPosts(vkGroupId));
+async function loadNewPosts() {
+  const groupIds = await vkGroupIds();
+  groupIds.forEach(groupId => loadGroupPosts(groupId));
 }
 
 function loadNewPostsLoop() {
-  // loadNewPosts();
-  // setTimeout(loadNewPostsLoop, LOOP_INTERVAL);
+  loadNewPosts();
+  setTimeout(loadNewPostsLoop, LOOP_INTERVAL);
 }
 
 async function userKeywords(userId) {
@@ -233,7 +241,11 @@ function loadCommands() {
   commands.forEach( command => addNewCommand(command));
 }
 
-loadCommands();
-bot.start();
+async function start() {
+  loadCommands();
+  await loadKeywordUsers();
+  bot.on('start', loadNewPostsLoop);
+  bot.start();
+}
 
-loadNewPostsLoop();
+start();
