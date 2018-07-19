@@ -212,11 +212,11 @@ const commands = [
 ];
 
 function wrapCommand(command) {
-  return function (msg, props) {
+  return async function (msg, props) {
     const userId = msg.from.id;
     if (command.admin && !isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
 
-    try { command.function(msg, props) }
+    try { await command.function(msg, props) }
     catch(error) {
       let answer = SOME_ERROR_MESSAGE;
       if (isAdmin(userId)) answer += '\n\n' + error;
