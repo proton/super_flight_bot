@@ -33,7 +33,7 @@ function isAdmin(userId) {
 }
 
 function postUrl(post) {
-  return `https://vk.com/wall${post.fromId}_${post.id}`
+  return `https://vk.com/wall${post.from_id}_${post.id}`
 }
 
 function postToMessage(post) {
