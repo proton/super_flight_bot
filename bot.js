@@ -220,13 +220,41 @@ async function commandVkGroups(msg, _props) {
   return msg.reply.text(answer);
 }
 
-bot.on(/^\/add (.+)$/, commandAdd);
-bot.on(/^\/delete (.+)$/, commandDelete);
-bot.on('/keywords', commandKeywords);
-bot.on(/^\/add_vk_group (.+)$/, commandAddVkGroup);
-bot.on(/^\/delete_vk_group (.+)$/, commandDeleteVkGroup);
-bot.on('/vk_groups', commandVkGroups);
-bot.on(['/start', '/help'], commandHelp);
+const commands = [
+  { matcher: /^\/add (.+)$/, function: commandAdd,
+    description: '/add keyword - Add new keyword to the list' },
+  { matcher: /^\/delete (.+)$/, function: commandDelete,
+    description: '/delete keyword - Delete keyword from the list' },
+  { matcher: '/keywords', function: commandKeywords,
+    description: '/keywords - List your keywords' },
+  { matcher: /^\/add_vk_group (.+)$/, function: commandAddVkGroup,
+    description: '/add_vk_group group_id - Add new vk group', admin: true },
+  { matcher: /^\/delete_vk_group (.+)$/, function: commandDeleteVkGroup,
+    description: '/delete_vk_group group_id - Delete vk group', admin: true },
+  { matcher: '/vk_groups', function: commandVkGroups,
+    description: '/vk_groups - Show vk groups', admin: true },
+  { matcher: ['/start', '/help'], function: commandHelp,
+    description: '/help - This help' },
+];
+
+function wrapCommand(command) {
+  return function (msg, props) {
+    const userId = msg.from.id;
+    if (command.admin && !isAdmin(userId)) return msg.reply.text(NOT_AUTHORIZED_MESSAGE);
+
+    return command.function(msg, props);
+  };
+}
+
+function addNewCommand(command) {
+  bot.on(command.matcher, wrapCommand(command));
+}
+
+function loadCommands() {
+  commands.forEach( command => addNewCommand(command));
+}
+
+loadCommands();
 bot.start();
 
 loadNewPostsLoop();
