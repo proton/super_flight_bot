@@ -42,10 +42,10 @@ function postToMessage (post) {
 
 function sendPostToUsers (bot, post) {
   let sentToUsers = {}
-  let lowercased_text = post.text.toLowerCase()
+  let lowerText = post.text.toLowerCase()
 
   for (let keyword in keywordUsers) {
-    if (!lowercased_text.includes(keyword)) continue
+    if (!lowerText.includes(keyword)) continue
     let text = postToMessage(post)
     let userIds = keywordUsers[keyword]
     userIds.forEach(userId => {
@@ -138,7 +138,7 @@ async function commandDelete (msg, props) {
   const cnt = await db.userKeywords.remove(objKeyword, { multi: true })
 
   let answer
-  if (cnt == 0) answer = `Keyword ${keyword} doesnt exist`
+  if (cnt === 0) answer = `Keyword ${keyword} doesnt exist`
   else {
     answer = `Deleted keyword ${keyword}`
     await reloadKeywordUsers(keyword)
@@ -185,12 +185,14 @@ async function commandAddVkGroup (msg, props) {
 }
 
 async function commandDeleteVkGroup (msg, props) {
+  const userId = msg.from.id
+  let vkGroupId = props.match[1]
   let objGroup = { group_id: vkGroupId }
 
   const cnt = await db.vkGroups.remove(objGroup, { multi: true })
 
   let answer
-  if (cnt == 0) answer = `Vk group ${vkGroupId} doesnt exist`
+  if (cnt === 0) answer = `Vk group ${vkGroupId} doesnt exist`
   else answer = `Deleted vk group ${vkGroupId}`
 
   answer += '\n\n' + await vkGroupsListsMessage(userId)
